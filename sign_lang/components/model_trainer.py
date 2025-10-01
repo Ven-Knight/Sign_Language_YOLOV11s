@@ -7,7 +7,7 @@ import sys
 import shutil
 from ultralytics                       import YOLO
 
-from sign_lang.logger                  import logging
+from sign_lang.logger                  import logger
 from sign_lang.exception               import AppException
 from sign_lang.entity.config_entity    import ModelTrainerConfig
 from sign_lang.entity.artifacts_entity import ModelTrainerArtifact
@@ -23,7 +23,7 @@ class ModelTrainer:
     # Entry point for training — returns model artifact
     # ─────────────────────────────────────────────────────────
     def initiate_model_trainer(self, data_ingestion_artifact: DataIngestionArtifact) -> ModelTrainerArtifact:
-        logging.info("Starting YOLOv11 training")
+        logger.info("Starting YOLOv11 training")
 
         try:
             # Load pretrained model
@@ -48,7 +48,7 @@ class ModelTrainer:
                         )
 
             # Log training configuration for traceability
-            logging.info(f"Training config — epochs: {self.model_trainer_config.no_epochs}, batch size: {self.model_trainer_config.batch_size}")
+            logger.info(f"Training config — epochs: {self.model_trainer_config.no_epochs}, batch size: {self.model_trainer_config.batch_size}")
             
             # Dynamically locate best.pt from YOLO's save_dir
             output_dir       = model.trainer.save_dir                        # Automatically set by Ultralytics
@@ -67,7 +67,7 @@ class ModelTrainer:
 
             # Return artifact
             artifact         = ModelTrainerArtifact(trained_model_file_path=final_model_path)
-            logging.info(f"Model training completed: {artifact}")
+            logger.info(f"Model training completed: {artifact}")
             return artifact
 
         except Exception as e:

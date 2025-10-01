@@ -7,7 +7,7 @@ import sys
 import zipfile
 import gdown
 
-from sign_lang.logger                  import logging
+from sign_lang.logger                  import logger
 from sign_lang.exception               import AppException
 from sign_lang.entity.config_entity    import DataIngestionConfig
 from sign_lang.entity.artifacts_entity import DataIngestionArtifact
@@ -33,12 +33,12 @@ class DataIngestion:
             os.makedirs(zip_download_dir, exist_ok=True)
 
             zip_file_path    = os.path.join(zip_download_dir, "data.zip")
-            logging.info(f"Downloading data from {dataset_url} into {zip_file_path}")
+            logger.info(f"Downloading data from {dataset_url} into {zip_file_path}")
 
             file_id          = dataset_url.split("/")[-2]
             gdown.download(f"https://drive.google.com/uc?/export=download&id={file_id}", zip_file_path)
 
-            logging.info(f"Download complete: {zip_file_path}")
+            logger.info(f"Download complete: {zip_file_path}")
             return zip_file_path
 
         except Exception as e:
@@ -56,7 +56,7 @@ class DataIngestion:
             with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
                 zip_ref.extractall(feature_store_path)
 
-            logging.info(f"Extracted {zip_file_path} into {feature_store_path}")
+            logger.info(f"Extracted {zip_file_path} into {feature_store_path}")
             return feature_store_path
 
         except Exception as e:
@@ -66,7 +66,7 @@ class DataIngestion:
     # Orchestrates download + extraction and returns artifact
     # ─────────────────────────────────────────────────────────
     def initiate_data_ingestion(self) -> DataIngestionArtifact:
-        logging.info("Starting data ingestion pipeline")
+        logger.info("Starting data ingestion pipeline")
 
         try:
             zip_file_path      = self.download_data()
@@ -77,7 +77,7 @@ class DataIngestion:
                                                         feature_store_path = feature_store_path
                                                       )
 
-            logging.info(f"Data ingestion completed: {artifact}")
+            logger.info(f"Data ingestion completed: {artifact}")
             return artifact
 
         except Exception as e:

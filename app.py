@@ -51,8 +51,13 @@ def predictRoute():
         decodeImage(image, clApp.filename)
 
         # Load trained YOLOv11 model
-        model           = YOLO("yolov11/my_model.pt")          # Update path if needed
+        model_path      = os.path.join("artifacts", "model_trainer", "best.pt")
 
+        if not os.path.exists(model_path):
+            return Response(f"Model file not found at {model_path}", status=404)
+        
+        model           = YOLO(model_path)
+        
         # Run inference on uploaded image
         results = model.predict(source=os.path.join("data", clApp.filename), save=True)
 
@@ -82,7 +87,12 @@ def predictRoute():
 @cross_origin()
 def predictLive():
     try:
-        model = YOLO("yolov11/my_model.pt")  # Update path if needed
+        model_path  = os.path.join("artifacts", "model_trainer", "best.pt")
+
+        if not os.path.exists(model_path):
+            return Response(f"Model file not found at {model_path}", status=404)
+        
+        model       = YOLO(model_path)  
         model.predict(source=0, show=True)   # Live webcam feed
         os.system("rm -rf runs")
         return "Camera started!!"

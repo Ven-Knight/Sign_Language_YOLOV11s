@@ -6,7 +6,7 @@ import os
 import sys
 import shutil
 
-from sign_lang.logger                  import logging
+from sign_lang.logger                  import logger
 from sign_lang.exception               import AppException
 from sign_lang.entity.config_entity    import DataValidationConfig
 from sign_lang.entity.artifacts_entity import (
@@ -77,13 +77,13 @@ class DataValidation:
     # Orchestrates validation and returns artifact
     # ─────────────────────────────────────────────────────────
     def initiate_data_validation(self) -> DataValidationArtifact:
-        logging.info("Starting data validation")
+        logger.info("Starting data validation")
 
         try:
             status   = self.validate_all_files_exist()
             artifact = DataValidationArtifact(validation_status = status)
 
-            logging.info(f"Validation completed: {artifact}")
+            logger.info(f"Validation completed: {artifact}")
 
             # Optionally copy zip file to working directory for traceability
             if status:
