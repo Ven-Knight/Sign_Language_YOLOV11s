@@ -24,5 +24,5 @@ DATA_VALIDATION_ALL_REQUIRED_FILES        = ["train", "val", "data.yaml"]    # e
 # ─────────────────────────────────────────────────────────────
 MODEL_TRAINER_DIR_NAME              : str = "model_trainer"                  # training stage folder
 MODEL_TRAINER_PRETRAINED_WEIGHT_NAME: str = "yolo11s.pt"                     # base weights
-MODEL_TRAINER_NO_EPOCHS             : int = 1                               # training epochs
-MODEL_TRAINER_BATCH_SIZE            : int = 16                               # batch size
+MODEL_TRAINER_NO_EPOCHS             : int = 50                               # training epochs
+MODEL_TRAINER_BATCH_SIZE            : int = 5                                # batch size

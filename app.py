@@ -4,6 +4,7 @@
 
 import os
 import sys
+import cv2
 from flask                                import Flask, request, jsonify, render_template, Response
 from flask_cors                           import CORS, cross_origin
 from ultralytics                          import YOLO
@@ -83,26 +84,85 @@ def predictRoute():
 # ─────────────────────────────────────────────────────────
 # Route: Live Camera Detection
 # ─────────────────────────────────────────────────────────
+# @app.route("/live", methods=['GET'])
+# @cross_origin()
+# def predictLive():
+#     try:
+#         model_path  = os.path.join("artifacts", "model_trainer", "best.pt")
+
+#         if not os.path.exists(model_path):
+#             return Response(f"Model file not found at {model_path}", status=404)
+        
+#         model       = YOLO(model_path)  
+#         model.predict(source=0, show=True)   # Live webcam feed
+#         os.system("rm -rf runs")
+#         return "Camera started!!"
+
+#     except ValueError as val:
+#         print(val)
+#         return Response("Value not found inside JSON data")
+#     except Exception as e:
+#         print(e)
+#         return Response("Camera error")
+
+
+
+# Load trained YOLOv11 model from artifact path
+model_path = os.path.join("artifacts", "model_trainer", "best.pt")
+model      = YOLO(model_path)  
+
+
+# Frame Generator — Captures webcam, runs inference, streams MJPEG
+def gen_frames():
+    cap = cv2.VideoCapture(0)  # 0 = default webcam device
+    if not cap.isOpened():
+        raise RuntimeError("Webcam not accessible — check device or permissions")
+
+    while True:
+        success, frame = cap.read()
+        if not success:
+            break  # Exit loop if frame capture fails
+
+        # ─────────────────────────────────────────────────────
+        # Run YOLOv11 inference on current frame
+        # stream=True yields generator of Results objects
+        # show=False disables OpenCV window popups
+        # verbose=False suppresses console spam
+        # ─────────────────────────────────────────────────────
+        results = model.predict(frame, stream=True, show=False, verbose=False)
+
+        for r in results:
+            annotated   = r.plot()  # Overlay bounding boxes and labels
+            ret, buffer = cv2.imencode('.jpg', annotated)
+            frame_bytes = buffer.tobytes()
+
+            # ─────────────────────────────────────────────────
+            # Yield frame in MJPEG format for browser rendering
+            # ─────────────────────────────────────────────────
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+    cap.release()  # Ensure camera is released on exit
+
+# ─────────────────────────────────────────────────────────────
+# Flask Route — Streams annotated webcam feed to browser
+# ─────────────────────────────────────────────────────────────
 @app.route("/live", methods=['GET'])
 @cross_origin()
 def predictLive():
     try:
-        model_path  = os.path.join("artifacts", "model_trainer", "best.pt")
-
         if not os.path.exists(model_path):
             return Response(f"Model file not found at {model_path}", status=404)
-        
-        model       = YOLO(model_path)  
-        model.predict(source=0, show=True)   # Live webcam feed
-        os.system("rm -rf runs")
-        return "Camera started!!"
 
-    except ValueError as val:
-        print(val)
-        return Response("Value not found inside JSON data")
+        # ─────────────────────────────────────────────────────
+        # Return MJPEG stream to browser — compatible with Chrome/Firefox
+        # ─────────────────────────────────────────────────────
+        return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
     except Exception as e:
-        print(e)
-        return Response("Camera error")
+        print(f"Live stream error: {e}")
+        return Response("Camera error", status=500)
+
 
 # ─────────────────────────────────────────────────────────
 # App Entry Point
