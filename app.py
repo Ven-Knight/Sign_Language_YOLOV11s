@@ -84,28 +84,6 @@ def predictRoute():
 # ─────────────────────────────────────────────────────────
 # Route: Live Camera Detection
 # ─────────────────────────────────────────────────────────
-# @app.route("/live", methods=['GET'])
-# @cross_origin()
-# def predictLive():
-#     try:
-#         model_path  = os.path.join("artifacts", "model_trainer", "best.pt")
-
-#         if not os.path.exists(model_path):
-#             return Response(f"Model file not found at {model_path}", status=404)
-        
-#         model       = YOLO(model_path)  
-#         model.predict(source=0, show=True)   # Live webcam feed
-#         os.system("rm -rf runs")
-#         return "Camera started!!"
-
-#     except ValueError as val:
-#         print(val)
-#         return Response("Value not found inside JSON data")
-#     except Exception as e:
-#         print(e)
-#         return Response("Camera error")
-
-
 
 # Load trained YOLOv11 model from artifact path
 model_path = os.path.join("artifacts", "model_trainer", "best.pt")
